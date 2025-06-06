@@ -1,0 +1,119 @@
+// Prisma schema for classifieds platform
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum CategoryType {
+  JOB
+  HOUSING
+  MARKET
+  QA
+}
+
+enum ListingStatus {
+  ACTIVE
+  EXPIRED
+}
+
+enum TrustEventType {
+  TRANSACTION
+  RATING
+  PENALTY
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCESS
+  FAILED
+}
+
+model User {
+  id          String       @id @default(uuid())
+  email       String       @unique
+  name        String?
+  image       String?
+  provider    String
+  providerId  String
+  verifiedAt  DateTime?
+  listings    Listing[]
+  trustEvents TrustEvent[]
+  payments    Payment[]
+  tickets     SupportTicket[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+}
+
+model Category {
+  id         String       @id @default(uuid())
+  type       CategoryType
+  label      String
+  listings   Listing[]
+  createdAt  DateTime     @default(now())
+}
+
+model Listing {
+  id            String           @id @default(uuid())
+  user          User             @relation(fields: [userId], references: [id])
+  userId        String
+  category      Category         @relation(fields: [categoryId], references: [id])
+  categoryId    String
+  title         String
+  description   String
+  price         Float?
+  status        ListingStatus    @default(ACTIVE) @index
+  promoted      Boolean          @default(false)
+  expiresAt     DateTime         @index
+  versions      ListingVersion[]
+  payments      Payment[]
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+}
+
+model ListingVersion {
+  id          String   @id @default(uuid())
+  listing     Listing  @relation(fields: [listingId], references: [id])
+  listingId   String   @index
+  version     Int
+  title       String
+  description String
+  price       Float?
+  createdAt   DateTime @default(now())
+}
+
+model TrustEvent {
+  id        String         @id @default(uuid())
+  user      User           @relation(fields: [userId], references: [id])
+  userId    String         @index
+  type      TrustEventType
+  value     Float
+  createdAt DateTime       @default(now())
+}
+
+model Payment {
+  id            String        @id @default(uuid())
+  user          User          @relation(fields: [userId], references: [id])
+  userId        String        @index
+  listing       Listing       @relation(fields: [listingId], references: [id])
+  listingId     String        @index
+  stripeId      String
+  amount        Float
+  currency      String
+  status        PaymentStatus @default(PENDING)
+  createdAt     DateTime      @default(now())
+}
+
+model SupportTicket {
+  id        String   @id @default(uuid())
+  user      User?    @relation(fields: [userId], references: [id])
+  userId    String?
+  message   String
+  createdAt DateTime @default(now())
+}
+
+@@index([title, description], type: FullText, map: "listing_search_idx")
