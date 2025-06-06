@@ -1,1 +1,18 @@
-# nameless-lab
+# Classifieds PWA
+
+## Setup
+
+```bash
+pnpm install
+pnpm dev
+```
+
+## Environment Variables
+
+- `DATABASE_URL`
+- `NEXTAUTH_SECRET`
+- `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`
+- `APPLE_CLIENT_ID`, `APPLE_CLIENT_SECRET`
+- `IG_CLIENT_ID`, `IG_CLIENT_SECRET`
+- `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`
+- `AWS_REGION`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`
